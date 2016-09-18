@@ -1,7 +1,10 @@
 package com.example.chau.folderview;
 
 import android.app.ListActivity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -51,13 +54,18 @@ public class FilePicker extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //save screen current on https://thinkandroid.wordpress.com/2010/01/24/handling-screen-off-and-screen-on-intents/
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        BroadcastReceiver mReceiver = new ScreenReceiver();
+        registerReceiver(mReceiver, filter);
+
         inflator = (LayoutInflater)
                 getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        emptyView = inflator.inflate(R.layout.empty_view, null);
-        ((ViewGroup) getListView().getParent()).addView(emptyView);
-        getListView().setEmptyView(emptyView);
-
+//        emptyView = inflator.inflate(R.layout.empty_view, null);
+//        ((ViewGroup) getListView().getParent()).addView(emptyView);
+//        getListView().setEmptyView(emptyView);
 
         // Set initial directory
         Directory = new File(DEFAULT_INITIAL_DIRECTORY);
@@ -99,8 +107,34 @@ public class FilePicker extends ListActivity {
 
     @Override
     protected void onResume() {
-        refreshFilesList();
+
+        if (!ScreenReceiver.wasScreenOn) {
+            // THIS IS WHEN ONRESUME() IS CALLED DUE TO A SCREEN STATE CHANGE
+//            System.out.println("SCREEN TURNED ON");
+            Log.d("onResume not Scree", " notSreceen");
+        } else {
+            refreshFilesList();
+            Log.d("onResume Scree","Sreceen");
+            // THIS IS WHEN ONRESUME() IS CALLED WHEN THE SCREEN STATE HAS NOT CHANGED
+        }
         super.onResume();
+    }
+    public static class ScreenReceiver extends BroadcastReceiver {
+
+        // THANKS JASON
+        public static boolean wasScreenOn = true;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                // DO WHATEVER YOU NEED TO DO HERE
+                wasScreenOn = false;
+            } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+                // AND DO WHATEVER YOU NEED TO DO HERE
+                wasScreenOn = true;
+            }
+        }
+
     }
     File[] files;
     protected void refreshFilesList() {
@@ -116,9 +150,8 @@ public class FilePicker extends ListActivity {
             for(File f : files) {
 
                 if(f.isHidden() && !ShowHiddenFiles) {
-
                     //continue;
-                    Files.add(f);
+                    //Files.add(f);
                 }
 
                 Files.add(f);
@@ -143,7 +176,9 @@ public class FilePicker extends ListActivity {
             if(thuMucHienTai.equals(Directory.getParentFile().toString())){
 
             }else{
+
                 stopPlaying(mpdefaul);
+                stopPlaying(mpforpic);
             }
             Directory = Directory.getParentFile();
             refreshFilesList();
@@ -175,11 +210,11 @@ public class FilePicker extends ListActivity {
             //Log.d("filenow", tokens.toString());
             //Log.d("filename1", tokens[tokens.length-4] +"__"+  tokens[tokens.length-3] +"__"+ tokens[tokens.length-2] +"__ "+tokens[tokens.length-1]);
             if(extension.equals("jpg") || extension.equals("JPG") || extension.equals("gif")||extension.equals("GIF")||extension.equals("png")||extension.equals("png")){
-                View imgView = inflator.inflate(R.layout.imgview, null);
-                ((ViewGroup) getListView().getParent()).addView(imgView);
-                getListView().setEmptyView(imgView);
+                emptyView = inflator.inflate(R.layout.imgview, null);
+                ((ViewGroup) getListView().getParent()).addView(emptyView);
+                getListView().setEmptyView(emptyView);
 
-                final ImageView imageView= (ImageView) imgView.findViewById(R.id.imageViewhe);
+                final ImageView imageView= (ImageView) emptyView.findViewById(R.id.imageViewhe);
                 Log.d("setImageBitmap", pathfile);
                 try {
                     imageView.setImageDrawable(getImageFromSdCard(pathfile));
@@ -201,11 +236,11 @@ public class FilePicker extends ListActivity {
                 playforpic(pathfile);
 
                 //set text
-                final TextView tetvew= (TextView) imgView.findViewById(R.id.textView);
+                final TextView tetvew= (TextView) emptyView.findViewById(R.id.textView);
                 tetvew.setText(filename);
                 iPost=position;
 
-                Button btn1= (Button) imgView.findViewById(R.id.button);
+                Button btn1= (Button) emptyView.findViewById(R.id.button);
                 btn1.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -315,7 +350,10 @@ public class FilePicker extends ListActivity {
         //if (mpdefaul != null) {
         try {
             //if (mpdefaul.isPlaying()) {
-            if (mp.isPlaying()) mp.stop();
+            if (mp.isPlaying()) {
+                Toast.makeText(FilePicker.this, "Stop", Toast.LENGTH_SHORT).show();
+                mp.stop();
+            }
            // mpdefaul.stop();
                // mpdefaul.reset();
             mp.release();
