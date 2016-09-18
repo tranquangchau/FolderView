@@ -176,9 +176,11 @@ public class FilePicker extends ListActivity {
             if(thuMucHienTai.equals(Directory.getParentFile().toString())){
 
             }else{
-
-                stopPlaying(mpdefaul);
-                stopPlaying(mpforpic);
+                Boolean a1 =stopPlaying(mpdefaul);
+                Boolean a2= stopPlaying(mpforpic);
+                if(a1==true || a2==true){
+                    Toast.makeText(FilePicker.this, "Stop", Toast.LENGTH_SHORT).show();
+                }
             }
             Directory = Directory.getParentFile();
             refreshFilesList();
@@ -346,18 +348,22 @@ public class FilePicker extends ListActivity {
         }
     }
 
-    private void stopPlaying(MediaPlayer mp) {
+    private boolean stopPlaying(MediaPlayer mp) {
         //if (mpdefaul != null) {
         try {
             //if (mpdefaul.isPlaying()) {
             if (mp.isPlaying()) {
-                Toast.makeText(FilePicker.this, "Stop", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(FilePicker.this, "Stop", Toast.LENGTH_SHORT).show();
                 mp.stop();
+                mp.release();
+                mp = null;
+                return true;
             }
            // mpdefaul.stop();
                // mpdefaul.reset();
             mp.release();
             mp = null;
+
                 //Toast.makeText(FilePicker.this, "Mp3 Stop", Toast.LENGTH_SHORT).show();
 
                 // mpdefaul.release();
@@ -370,6 +376,7 @@ public class FilePicker extends ListActivity {
         }
 
         //}
+        return false;
     }
 
 
