@@ -108,7 +108,8 @@ public class FilePicker extends ListActivity {
     @Override
     protected void onResume() {
 
-        if (!ScreenReceiver.wasScreenOn) {
+        if (!ScreenReceiver.wasScreenOn || isPause==true) {
+            isPause=false;
             // THIS IS WHEN ONRESUME() IS CALLED DUE TO A SCREEN STATE CHANGE
 //            System.out.println("SCREEN TURNED ON");
             Log.d("onResume not Scree", " notSreceen");
@@ -119,6 +120,13 @@ public class FilePicker extends ListActivity {
         }
         super.onResume();
     }
+    Boolean isPause=false;
+    @Override
+    protected void onPause() {
+        isPause=true;
+        super.onPause();
+    }
+
     public static class ScreenReceiver extends BroadcastReceiver {
 
         // THANKS JASON
@@ -260,7 +268,7 @@ public class FilePicker extends ListActivity {
                             final String pathfile=files[icuu].getAbsolutePath();
                             String extension = pathfile.substring(pathfile.lastIndexOf(".") + 1, pathfile.length());
                             String filename = pathfile.substring(pathfile.lastIndexOf("/") + 1, pathfile.length());
-                            if(extension.equals("jpg")) {
+                            if(extension.equals("jpg") || extension.equals("JPG") || extension.equals("gif")||extension.equals("GIF")||extension.equals("png")||extension.equals("png")){
                                 imageView.setImageDrawable(getImageFromSdCard(pathfile));
                                 playforpic(pathfile);
                             }
