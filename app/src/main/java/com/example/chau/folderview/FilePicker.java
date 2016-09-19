@@ -198,7 +198,8 @@ public class FilePicker extends ListActivity {
         super.onBackPressed();
     }
     Integer iPost;
-
+    //ZoomableImageView touch;
+    Bitmap bitmap;
     @Override
     protected void onListItemClick(final ListView l, View v, final int position, final long id) {
 
@@ -224,10 +225,18 @@ public class FilePicker extends ListActivity {
                 ((ViewGroup) getListView().getParent()).addView(emptyView);
                 getListView().setEmptyView(emptyView);
 
-                final ImageView imageView= (ImageView) emptyView.findViewById(R.id.imageViewhe);
+               // final ImageView imageView= (ImageView) emptyView.findViewById(R.id.imageViewhe);
+                if(bitmap!=null){
+                    bitmap=null;
+                }
+
+                ZoomableImageView touch = (ZoomableImageView) emptyView.findViewById(R.id.imageViewhe);
+                Log.d("Logtouch", String.valueOf(touch));
                 Log.d("setImageBitmap", pathfile);
                 try {
-                    imageView.setImageDrawable(getImageFromSdCard(pathfile));
+//                    imageView.setImageDrawable(getImageFromSdCard(pathfile));
+                    bitmap = BitmapFactory.decodeFile(pathfile);
+                    touch.setImageBitmap(bitmap);
                 }catch (Exception e){
                     Toast.makeText(FilePicker.this, "Error"+e.toString(), Toast.LENGTH_SHORT).show();
                 }
@@ -269,7 +278,16 @@ public class FilePicker extends ListActivity {
                             String extension = pathfile.substring(pathfile.lastIndexOf(".") + 1, pathfile.length());
                             String filename = pathfile.substring(pathfile.lastIndexOf("/") + 1, pathfile.length());
                             if(extension.equals("jpg") || extension.equals("JPG") || extension.equals("gif")||extension.equals("GIF")||extension.equals("png")||extension.equals("png")){
-                                imageView.setImageDrawable(getImageFromSdCard(pathfile));
+                               // imageView.setImageDrawable(getImageFromSdCard(pathfile));
+                                if(bitmap!=null){
+                                    bitmap=null;
+                                }
+
+                               // Log.d("Logtouch1", String.valueOf(touch));
+                                ZoomableImageView touch = (ZoomableImageView) emptyView.findViewById(R.id.imageViewhe);
+                                bitmap = BitmapFactory.decodeFile(pathfile);
+                                touch.setImageBitmap(bitmap);
+
                                 playforpic(pathfile);
                             }
                             tetvew.setText(filename);
